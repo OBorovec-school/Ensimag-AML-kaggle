@@ -1,6 +1,35 @@
-# matplotlib support
+from collections import defaultdict
+from scipy.sparse import csr_matrix
 import matplotlib.pyplot as plt
 
+
+# kgrams sparse feature matrix
+def kgram_sparse_matrix(df, data_column='seg', kgram_level=6):
+    feature_set = {}
+    id_row = 0
+    feature_id = 0
+    row = []
+    col = []
+    data = []
+    for index, row in df.iterrows():
+        local_features = defaultdict(lambda: 0)
+        sequence = df[data_column]
+        for kgram in kgram_level + 1:
+            for i in range(len(sequence) - kgram):
+                sub_seq = row.seq[i:i + kgram]
+                local_features[sub_seq] += 1
+        for key in local_features.keys():ww
+            if key not in feature_set:
+                feature_set[key] = feature_id
+                feature_id += 1
+            row.append(id_row)
+            col.append(feature_set[key])
+            data.append(local_features[key])
+        id_row += 1
+    return csr_matrix((data, (row, col)), shape=(len(df), feature_id + 1))
+
+
+# matplotlib support
 def show_feature_extraction_memory_usage(x, time, memory, title):
     desc = '_kgrams_time_memory_usage.png'
     fig, axes = plt.subplots(2, sharex=True)
