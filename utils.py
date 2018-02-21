@@ -4,29 +4,33 @@ import matplotlib.pyplot as plt
 
 
 # kgrams sparse feature matrix
-def kgram_sparse_matrix(df, data_column='seg', kgram_level=6):
-    feature_set = {}
-    id_row = 0
-    feature_id = 0
-    row = []
-    col = []
+def kgram_sparse_matrix(df, data_column='seq', kgram_level=6, kgram_min=2, feature_set=None, increasing=True):
+    if feature_set is None:
+        feature_set = {}
+    feature_id = len(feature_set)
+    row_idx = []
+    col_idx = []
     data = []
-    for index, row in df.iterrows():
+    for sample, (index, row) in enumerate(df.iterrows()):
         local_features = defaultdict(lambda: 0)
-        sequence = df[data_column]
-        for kgram in kgram_level + 1:
-            for i in range(len(sequence) - kgram):
+        sequence = row[data_column]
+        for kgram in range(kgram_min, kgram_level + 1):
+            for i in range(len(sequence) - kgram + 1):
                 sub_seq = row.seq[i:i + kgram]
                 local_features[sub_seq] += 1
-        for key in local_features.keys():ww
-            if key not in feature_set:
-                feature_set[key] = feature_id
-                feature_id += 1
-            row.append(id_row)
-            col.append(feature_set[key])
-            data.append(local_features[key])
-        id_row += 1
-    return csr_matrix((data, (row, col)), shape=(len(df), feature_id + 1))
+        for key in local_features.keys():
+            if key in feature_set:
+                row_idx.append(sample)
+                col_idx.append(feature_set[key])
+                data.append(local_features[key])
+            else:
+                if increasing:
+                    feature_set[key] = feature_id
+                    feature_id += 1
+                    row_idx.append(sample)
+                    col_idx.append(feature_set[key])
+                    data.append(local_features[key])
+    return csr_matrix((data, (row_idx, col_idx)), shape=(len(df), feature_id + 1)), feature_set
 
 
 # matplotlib support
