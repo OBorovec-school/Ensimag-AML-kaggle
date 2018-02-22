@@ -4,8 +4,8 @@ from svm import SVMClassifier
 import utils
 
 
-MAX_KGRAM = 12
-MIN_KGRAM = 2
+MAX_KGRAM = 16
+MIN_KGRAM = 5
 
 REG_PARAM = 0.205
 
